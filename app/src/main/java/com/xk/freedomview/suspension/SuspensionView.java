@@ -6,18 +6,33 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 /**
+ * 小圆点
+ *
  * @author xuekai1
  * @date 2018/8/24
  */
 public class SuspensionView extends android.support.v7.widget.AppCompatImageView {
     private Listener listener;
+    /**
+     * 上次ontouchevent的x值
+     */
+    float lastX = 0;
+    /**
+     * 上次ontouchevent的y值
+     */
+    float lastY = 0;
+
+    /**
+     * 上次手指抬起的时间，用来处理按钮双击的判断
+     */
+    long lastUp = 0;
 
     public SuspensionView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public SuspensionView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
 
     }
 
@@ -26,49 +41,41 @@ public class SuspensionView extends android.support.v7.widget.AppCompatImageView
     }
 
 
-    float lastX = 0;
-    float lastY = 0;
-
-
-    long lastUp = 0;
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (System.currentTimeMillis() - lastUp < 100) {
                     if (listener != null) {
-                        listener.reset();
+                        listener.doubleClick();
                     }
                     return false;
                 }
+                //lastup使用完毕，置零
                 lastUp = 0;
                 if (listener != null) {
-                    listener.onStart();
+                    listener.onDown();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 float dx = event.getRawX() - lastX;
                 float dy = event.getRawY() - lastY;
+                if (listener != null) {
+                    listener.onMovie(dx, dy);
+                }
                 setX(getX() + dx);
                 setY(getY() + dy);
                 break;
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
                 lastUp = System.currentTimeMillis();
                 if (listener != null) {
-                    listener.onStop();
-                }
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                if (listener != null) {
-                    listener.onStop();
+                    listener.onUpOrCancel();
                 }
                 break;
             default:
                 break;
         }
-
         lastX = event.getRawX();
         lastY = event.getRawY();
         return true;
@@ -81,10 +88,28 @@ public class SuspensionView extends android.support.v7.widget.AppCompatImageView
 
 
     public interface Listener {
-        void onStart();
+        /**
+         * 按下回调
+         */
+        void onDown();
 
-        void onStop();
+        /**
+         * 手指抬起或cancel
+         */
+        void onUpOrCancel();
 
-        void reset();
+        /**
+         * 双击回调
+         */
+        void doubleClick();
+
+        /**
+         * 移动回调
+         *
+         * @param dx 增量
+         * @param dy 增量
+         */
+        void onMovie(float dx, float dy);
+
     }
 }

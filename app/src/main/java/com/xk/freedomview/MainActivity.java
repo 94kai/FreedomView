@@ -1,43 +1,26 @@
 package com.xk.freedomview;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.xk.freedomview.suspension.SuspensionView;
+import com.xk.freedomview.gravity.GravityActivity;
 
-public class MainActivity extends AppCompatActivity {
-
-    private FreedomView freedomView;
-
+/**
+ * @author xuekai1
+ * @date 2018/8/24
+ */
+public class MainActivity extends Activity {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        freedomView = findViewById(R.id.fd);
-
-
-        SuspensionView suspensionView = (SuspensionView) findViewById(R.id.suspension);
-
-        suspensionView.setListener(new SuspensionView.Listener() {
-            @Override
-            public void onStart() {
-                freedomView.open();
-            }
-
-            @Override
-            public void onStop() {
-                freedomView.close();
-            }
-
-            @Override
-            public void reset() {
-                freedomView.resetLocal();
-            }
-        });
-
     }
 
-    public void click(View view) {
+    public void toGravity(View view) {
+        startActivity(new Intent(this, GravityActivity.class));
+
     }
 }

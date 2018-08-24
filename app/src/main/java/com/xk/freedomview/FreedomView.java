@@ -103,7 +103,7 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
             final float x = event.values[0];
             final float y = event.values[1];
             final float z = event.values[2];
-            setLayoutParams(x, y, z);
+            setLayoutParamsByGravity(x, y, z);
         }
     }
 
@@ -111,7 +111,7 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
     float originalX;
     float originalY;
 
-    private synchronized void setLayoutParams(float x, float y, float z) {
+    private synchronized void setLayoutParamsByGravity(float x, float y, float z) {
 
         if (lastX == -999 || lastY == -999 || lastZ == -999) {
             lastX = x;
@@ -122,17 +122,36 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
             y = y - lastY;
             z = z - lastZ;
 
-            if ((getY() - z * vY) < realTopBorder || (getY() - z * vY) > realBottomBorder) {
-            } else {
-                setY(getY() - z * vY);
-            }
+
+            setLayoutParams(x * vX, z * vY);
+//            if ((getY() - z * vY) < realTopBorder || (getY() - z * vY) > realBottomBorder) {
+//            } else {
+//                setY(getY() - z * vY);
+//            }
+//
+//
+//            if ((getX() - x * vX) < realLeftBorder || (getX() - x * vX) > realRightBorder) {
+//            } else {
+//                setX(getX() - x * vX);
+//
+//            }
+        }
+    }
 
 
-            if ((getX() - x * vX) < realLeftBorder || (getX() - x * vX) > realRightBorder) {
-            } else {
-                setX(getX() - x * vX);
+    private void setLayoutParams(float x, float y) {
 
-            }
+
+        if ((getY() - y) < realTopBorder || (getY() - y) > realBottomBorder) {
+        } else {
+            setY(getY() - y);
+        }
+
+
+        if ((getX() - x) < realLeftBorder || (getX() - x) > realRightBorder) {
+        } else {
+            setX(getX() - x);
+
         }
     }
 
@@ -148,13 +167,18 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
         lastX = lastY = lastZ = -999;
     }
 
-    public void close() {
+    public void closeGravity() {
         sensorManager.unregisterListener(this);
     }
 
-    public void open() {
+    public void openGravity() {
         resetBalance();
         sensorManager.registerListener(FreedomView.this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
+    }
+
+
+    public void moveByRockingBar(float x, float y) {
+        setLayoutParams(-x * 3, -y * 6);
     }
 
     public void resetLocal() {
