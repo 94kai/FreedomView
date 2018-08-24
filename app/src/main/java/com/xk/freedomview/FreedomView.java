@@ -1,6 +1,5 @@
 package com.xk.freedomview;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -9,7 +8,10 @@ import android.hardware.SensorManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 /**
  * @author xuekai1
@@ -17,15 +19,26 @@ import android.widget.FrameLayout;
  */
 public class FreedomView extends FrameLayout implements SensorEventListener {
 
-//    private SeekBar s1;
-//    private SeekBar s2;
-//    private SeekBar s3;
+
+    //x、y方向的速度
+    int vY = 5;
+    int vX = 7;
 
 
-    private int leftBorder = 0;
-    private int rightBorder = 1000;
-    private int topBorder = 0;
-    private int bottomBorder = 1000;
+    private int screenWidth;
+    private int screenHeight;
+
+    private final int leftBorder = -500;
+    private final int rightBorder = 0;
+    private final int topBorder = 0;
+    private final int bottomBorder = 600;
+
+
+    private final int realLeftBorder = leftBorder;
+    private final int realTopBorder = topBorder;
+    private int realRightBorder;
+    private int realBottomBorder;
+    private RelativeLayout.LayoutParams layoutParams;
 
     public FreedomView(@NonNull Context context) {
         super(context);
@@ -40,6 +53,23 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                WindowManager wm = (WindowManager) getContext()
+                        .getSystemService(Context.WINDOW_SERVICE);
+                screenWidth = wm.getDefaultDisplay().getWidth();
+                screenHeight = wm.getDefaultDisplay().getHeight();
+
+                realRightBorder = screenWidth - getMeasuredWidth() + rightBorder;
+                realBottomBorder = screenHeight + -getMeasuredHeight() + bottomBorder;
+                originalX = getX();
+                originalY = getY();
+                layoutParams = new RelativeLayout.LayoutParams(getLayoutParams());
+                Log.i("FreedomView", "run-->" + originalX + "==" + originalY);
+            }
+        }, 1000);
 
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
 
@@ -69,35 +99,20 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        boolean jiasudu = true;
-
-
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            //加速度传感器
-            if (!jiasudu) {
-                return;
-            }
-            // x,y,z分别存储坐标轴x,y,z上的加速度
-
             final float x = event.values[0];
-
             final float y = event.values[1];
-
             final float z = event.values[2];
-
-            // 根据三个方向上的加速度值得到总的加速度值a
-            float a = (float) Math.sqrt(x * x + y * y + z * z);
-            System.out.println("总加速度->" + a);
-            // 传感器从外界采集数据的时间间隔为10000微秒
-            // 加速度传感器的最大量程
-            System.out.println("xyz->" + x + "\n" + y + "\n" + z);
+            setLayoutParams(x, y, z);
         }
-
     }
 
     float lastX, lastY, lastZ = -999;
+    float originalX;
+    float originalY;
 
-    private void setLayoutParams(float x, float y, float z) {
+    private synchronized void setLayoutParams(float x, float y, float z) {
+
         if (lastX == -999 || lastY == -999 || lastZ == -999) {
             lastX = x;
             lastY = y;
@@ -107,21 +122,18 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
             y = y - lastY;
             z = z - lastZ;
 
-            if ((getY() - z * 5) < topBorder || (getY() - z * 5) > bottomBorder) {
+            if ((getY() - z * vY) < realTopBorder || (getY() - z * vY) > realBottomBorder) {
             } else {
-                setY(getY() - z * 5);
+                setY(getY() - z * vY);
             }
 
 
-            if ((getX() - x * 7) < leftBorder || (getX() - x * 7) > rightBorder) {
+            if ((getX() - x * vX) < realLeftBorder || (getX() - x * vX) > realRightBorder) {
             } else {
-                setX(getX() - x * 7);
+                setX(getX() - x * vX);
 
             }
-
         }
-
-
     }
 
     @Override
@@ -129,20 +141,25 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
 
     }
 
-    public void reset() {
-
+    /**
+     * 重置平衡点
+     */
+    public void resetBalance() {
         lastX = lastY = lastZ = -999;
-
-
     }
 
     public void close() {
         sensorManager.unregisterListener(this);
-
     }
 
     public void open() {
-        sensorManager.registerListener(FreedomView.this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        resetBalance();
+        sensorManager.registerListener(FreedomView.this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
+    }
 
+    public void resetLocal() {
+        resetBalance();
+        setX(originalX);
+        setY(originalY);
     }
 }

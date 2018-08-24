@@ -6,48 +6,55 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-    <TextView
-        android:id="@+id/abc"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="500dp"
-        android:layout_alignParentBottom="true"
-        android:onClick="click"
-        android:text="start" />
-    <com.xk.freedomview.FreedomView
-        android:id="@+id/fd"
-        android:layout_alignParentRight="true"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:background="#f0f">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/s1"
+            <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="筛选" />
-
-            <Button
-                android:id="@+id/s2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="50"
-                android:text="bt1" />
-
-            <Button
-                android:id="@+id/s3"
-
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="50"
-                android:text="bt1" />
+                android:scaleType="fitXY"
+                android:src="@drawable/searchview" />
         </LinearLayout>
 
+    </ScrollView>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#a000" />
+
+    <com.xk.freedomview.FreedomView
+        android:id="@+id/fd"
+        android:layout_marginLeft="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:visibility="visible">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/shaixuan" />
+
     </com.xk.freedomview.FreedomView>
+
+
+    <com.xk.freedomview.suspension.SuspensionView
+        android:id="@+id/suspension"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginLeft="50dp"
+        android:src="@drawable/point"
+        android:visibility="visible" />
+
 
 </RelativeLayout>

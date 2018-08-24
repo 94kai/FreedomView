@@ -1,41 +1,43 @@
 package com.xk.freedomview;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.MotionEvent;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import com.xk.freedomview.suspension.SuspensionView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FreedomView viewById1;
+    private FreedomView freedomView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        viewById1 = findViewById(R.id.fd);
-
-        final View viewById = findViewById(R.id.abc);
+        freedomView = findViewById(R.id.fd);
 
 
-        viewById.setOnTouchListener(new View.OnTouchListener() {
+        SuspensionView suspensionView = (SuspensionView) findViewById(R.id.suspension);
+
+        suspensionView.setListener(new SuspensionView.Listener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public void onStart() {
+                freedomView.open();
+            }
 
+            @Override
+            public void onStop() {
+                freedomView.close();
+            }
 
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    viewById1.open();
-
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    viewById1.close();
-
-                }
-                return false;
+            @Override
+            public void reset() {
+                freedomView.resetLocal();
             }
         });
+
     }
 
     public void click(View view) {
-        viewById1.reset();
     }
 }
