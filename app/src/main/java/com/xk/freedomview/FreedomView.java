@@ -138,17 +138,6 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
 
 
             setLayoutParams(x * vX, z * vY);
-//            if ((getY() - z * vY) < realTopBorder || (getY() - z * vY) > realBottomBorder) {
-//            } else {
-//                setY(getY() - z * vY);
-//            }
-//
-//
-//            if ((getX() - x * vX) < realLeftBorder || (getX() - x * vX) > realRightBorder) {
-//            } else {
-//                setX(getX() - x * vX);
-//
-//            }
         }
     }
 

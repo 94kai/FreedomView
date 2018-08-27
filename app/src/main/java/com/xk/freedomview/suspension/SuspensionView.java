@@ -40,16 +40,24 @@ public class SuspensionView extends android.support.v7.widget.AppCompatImageView
         super(context, attrs, defStyleAttr);
     }
 
-
+    //双击之后，这个置为true，使该view消费事件，却不做任何处理。 直到手指抬起。达到双击之后不触发其他效果的目的。
+    boolean isDoubleClick = false;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (isDoubleClick) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                isDoubleClick = false;
+            }
+            return true;
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (System.currentTimeMillis() - lastUp < 100) {
                     if (listener != null) {
                         listener.doubleClick();
+                        isDoubleClick = true;
                     }
-                    return false;
+                    return true;
                 }
                 //lastup使用完毕，置零
                 lastUp = 0;
@@ -68,6 +76,7 @@ public class SuspensionView extends android.support.v7.widget.AppCompatImageView
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                isDoubleClick = false;
                 lastUp = System.currentTimeMillis();
                 if (listener != null) {
                     listener.onUpOrCancel();
