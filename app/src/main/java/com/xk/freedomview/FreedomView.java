@@ -9,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -52,6 +54,18 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+
+        for (int i = 0; i < getChildCount(); i++) {
+            View suspensionView = getChildAt(i);
+            if (suspensionView.getClass().getSimpleName().contains("SuspensionView")) {
+                removeView(suspensionView);
+                if (getParent() instanceof ViewGroup) {
+                    ((ViewGroup) getParent()).addView(suspensionView);
+                }
+                break;
+            }
+        }
 
         postDelayed(new Runnable() {
             @Override

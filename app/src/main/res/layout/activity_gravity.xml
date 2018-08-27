@@ -43,25 +43,24 @@
             android:layout_height="match_parent"
             android:src="@drawable/shaixuan" />
 
+        <com.xk.freedomview.suspension.SuspensionView
+            android:id="@+id/suspension"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:layout_marginLeft="50dp"
+            android:src="@drawable/point"
+            android:visibility="visible" />
     </com.xk.freedomview.FreedomView>
 
 
-    <com.xk.freedomview.suspension.SuspensionView
-        android:id="@+id/suspension"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50dp"
-        android:layout_marginLeft="50dp"
-        android:src="@drawable/point"
-        android:visibility="visible" />
-
     <CheckBox
-        android:text="摇杆模式"
-        android:textStyle="bold"
-        android:textColor="@color/colorAccent"
         android:id="@+id/checkbox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="摇杆模式"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold" />
 
 </RelativeLayout>
