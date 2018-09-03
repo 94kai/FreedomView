@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gravity.GravityActivity">
+    tools:context=".DemoActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -46,7 +46,7 @@
     </com.xk.freedomview.FreedomView>
 
 
-    <com.xk.freedomview.suspension.SuspensionView
+    <com.xk.freedomview.SuspensionView
         android:id="@+id/suspension"
         android:layout_width="100dp"
         android:layout_height="100dp"

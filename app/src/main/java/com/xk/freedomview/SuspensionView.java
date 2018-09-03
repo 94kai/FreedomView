@@ -1,4 +1,4 @@
-package com.xk.freedomview.suspension;
+package com.xk.freedomview;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -38,6 +38,8 @@ public class SuspensionView extends android.support.v7.widget.AppCompatImageView
 
     public SuspensionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        setImageResource(R.drawable.point);
     }
 
     //双击之后，这个置为true，使该view消费事件，却不做任何处理。 直到手指抬起。达到双击之后不触发其他效果的目的。

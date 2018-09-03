@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -23,54 +25,93 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
 
 
     //x、y方向的速度
-    int vY = 5;
-    int vX = 7;
+    private final int vY = 5;
+    private final int vX = 7;
 
 
+    //屏幕宽高
     private int screenWidth;
     private int screenHeight;
 
-    private final int leftBorder = -500;
-    private final int rightBorder = 0;
-    private final int topBorder = 0;
-    private final int bottomBorder = 600;
+    //边距
+    private int leftBorder = -500;
+    private int rightBorder = 0;
+    private int topBorder = 0;
+    private int bottomBorder = 600;
 
 
-    private final int realLeftBorder = leftBorder;
-    private final int realTopBorder = topBorder;
+    private int realLeftBorder = leftBorder;
+    private int realTopBorder = topBorder;
     private int realRightBorder;
     private int realBottomBorder;
     private RelativeLayout.LayoutParams layoutParams;
+    private SuspensionView suspensionView;
+    private CheckBox checkBox;
 
-    public FreedomView(@NonNull Context context) {
-        super(context);
+    public FreedomView(@NonNull Context context, int left, int right, int top, int bottom) {
+        this(context, null);
+        leftBorder = left;
+        rightBorder = right;
+        bottomBorder = bottom;
+        topBorder = top;
+        realLeftBorder = leftBorder;
+        realTopBorder = topBorder;
     }
 
     public FreedomView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        checkBox = new CheckBox(getContext());
+        checkBox.setText("摇杆模式");
+        checkBox.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    checkBox.setText("摇杆模式");
+                } else {
+                    checkBox.setText("重力模式");
+                }
+            }
+        });
+
+        suspensionView = new SuspensionView(getContext());
+
+        suspensionView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
+        suspensionView.setX(100);
+        suspensionView.setY(800);
+        addView(checkBox);
+        addView(suspensionView);
 
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-
+        //删除susxxxx  垃圾代码。。
         for (int i = 0; i < getChildCount(); i++) {
-            View suspensionView = getChildAt(i);
-            if (suspensionView.getClass().getSimpleName().contains("SuspensionView")) {
-                removeView(suspensionView);
+            View childView = getChildAt(i);
+            if (childView.getClass().getSimpleName().contains("SuspensionView") || childView.getClass().getSimpleName().contains("CheckBox")) {
+                removeView(childView);
                 if (getParent() instanceof ViewGroup) {
-                    ((ViewGroup) getParent()).addView(suspensionView);
+                    ((ViewGroup) getParent()).addView(childView);
                 }
                 break;
             }
         }
-
+        //删除checkbox
+        for (int i = 0; i < getChildCount(); i++) {
+            View childView = getChildAt(i);
+            if (childView.getClass().getSimpleName().contains("SuspensionView") || childView.getClass().getSimpleName().contains("CheckBox")) {
+                removeView(childView);
+                if (getParent() instanceof ViewGroup) {
+                    ((ViewGroup) getParent()).addView(childView);
+                }
+                break;
+            }
+        }
         postDelayed(new Runnable() {
             @Override
             public void run() {
-
                 WindowManager wm = (WindowManager) getContext()
                         .getSystemService(Context.WINDOW_SERVICE);
                 screenWidth = wm.getDefaultDisplay().getWidth();
@@ -98,6 +139,34 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
 
 //SensorManager.SENSOR_DELAY_UI(60000微秒):用户界面。一般对于屏幕方向自动旋转使用，相对节省电能和逻辑处理，一般游戏开发中不使用
 
+        suspensionView.setListener(new SuspensionView.Listener() {
+            @Override
+            public void onDown() {
+                if (checkBox.isChecked()) {
+                    openGravity();
+                }
+            }
+
+            @Override
+            public void onUpOrCancel() {
+                if (checkBox.isChecked()) {
+                    closeGravity();
+                }
+            }
+
+            @Override
+            public void doubleClick() {
+                resetLocal();
+            }
+
+            @Override
+            public void onMovie(float dx, float dy) {
+                if (!checkBox.isChecked()) {
+                    moveByRockingBar(dx, dy);
+                }
+
+            }
+        });
 
     }
 
