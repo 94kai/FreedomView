@@ -1,0 +1,20 @@
+[
+  {
+    "activity": "DemoActivity",
+    "left": -500,
+    "top": 0,
+    "right": 0,
+    "bottom": 500,
+    "autoResetTime": 1000,
+    "mode":1
+  },
+  {
+    "activity": "SecondActivity",
+    "left": 0,
+    "top": 0,
+    "right": 500,
+    "bottom": 500,
+    "autoResetTime": 1000,
+    "mode":0
+  }
+]

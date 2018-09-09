@@ -1,9 +1,12 @@
-package com.xk.freedomview;
+package com.xk.freedomview.util;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+
+import com.xk.freedomview.R;
+
 
 /**
  * 小圆点

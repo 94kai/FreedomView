@@ -1,14 +1,17 @@
-package com.xk.freedomview;
+package com.xk.freedomview.util;
 
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -27,6 +30,9 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
     //x、y方向的速度
     private final int vY = 5;
     private final int vX = 7;
+
+
+    private int autoResetTime;
 
 
     //屏幕宽高
@@ -48,7 +54,17 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
     private SuspensionView suspensionView;
     private CheckBox checkBox;
 
-    public FreedomView(@NonNull Context context, int left, int right, int top, int bottom) {
+    private Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            if (message.what == 0) {
+                resetLocal();
+            }
+            return false;
+        }
+    });
+
+    public FreedomView(@NonNull Context context, int left, int right, int top, int bottom, int autoResetTime, int mode) {
         this(context, null);
         leftBorder = left;
         rightBorder = right;
@@ -56,31 +72,46 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
         topBorder = top;
         realLeftBorder = leftBorder;
         realTopBorder = topBorder;
+        this.autoResetTime = autoResetTime;
+        checkBox.setChecked(mode == 1);
     }
 
     public FreedomView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         checkBox = new CheckBox(getContext());
-        checkBox.setText("摇杆模式");
+        checkBox.setText("选择模式");
         checkBox.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        checkBox.setY(100);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
-                    checkBox.setText("摇杆模式");
-                } else {
                     checkBox.setText("重力模式");
+                } else {
+                    checkBox.setText("摇杆模式");
                 }
             }
         });
 
-        suspensionView = new SuspensionView(getContext());
+        suspensionView = new SuspensionView(getContext()) {
+            @Override
+            public boolean dispatchTouchEvent(MotionEvent event) {
+                handler.removeMessages(0);
+                if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                    Message msg = Message.obtain();
+                    msg.what = 0;
+                    handler.sendMessageDelayed(msg, autoResetTime);
+                }
+                return super.dispatchTouchEvent(event);
+            }
+        };
 
         suspensionView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
         suspensionView.setX(100);
         suspensionView.setY(800);
         addView(checkBox);
         addView(suspensionView);
+
 
     }
 
@@ -90,10 +121,10 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
         //删除susxxxx  垃圾代码。。
         for (int i = 0; i < getChildCount(); i++) {
             View childView = getChildAt(i);
-            if (childView.getClass().getSimpleName().contains("SuspensionView") || childView.getClass().getSimpleName().contains("CheckBox")) {
+            if (childView.getClass().getSuperclass().getSimpleName().contains("SuspensionView")) {
                 removeView(childView);
                 if (getParent() instanceof ViewGroup) {
-                    ((ViewGroup) getParent()).addView(childView);
+                    ((ViewGroup) getParent().getParent()).addView(childView);
                 }
                 break;
             }
@@ -104,7 +135,7 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
             if (childView.getClass().getSimpleName().contains("SuspensionView") || childView.getClass().getSimpleName().contains("CheckBox")) {
                 removeView(childView);
                 if (getParent() instanceof ViewGroup) {
-                    ((ViewGroup) getParent()).addView(childView);
+                    ((ViewGroup) getParent().getParent()).addView(childView);
                 }
                 break;
             }
@@ -129,15 +160,6 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
 
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-
-//SensorManager.SENSOR_DELAY_FASTEST(0微秒)：最快。最低延迟，一般不是特别敏感的处理不推荐使用，该模式可能在成手机电力大量消耗，由于传递的为原始数据，诉法不处理好会影响游戏逻辑和UI的性能
-
-//SensorManager.SENSOR_DELAY_GAME(20000微秒)：游戏。游戏延迟，一般绝大多数的实时性较高的游戏都是用该级别
-
-//SensorManager.SENSOR_DELAY_NORMAL(200000微秒):普通。标准延时，对于一般的益智类或EASY级别的游戏可以使用，但过低的采样率可能对一些赛车类游戏有跳帧现象
-
-//SensorManager.SENSOR_DELAY_UI(60000微秒):用户界面。一般对于屏幕方向自动旋转使用，相对节省电能和逻辑处理，一般游戏开发中不使用
 
         suspensionView.setListener(new SuspensionView.Listener() {
             @Override
@@ -214,13 +236,13 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
     private void setLayoutParams(float x, float y) {
 
 
-        if ((getY() - y) < realTopBorder || (getY() - y) > realBottomBorder) {
+        if ((getY() - y) < realTopBorder || (getY() - y) > realBottomBorder || (topBorder == 0 && bottomBorder == 0)) {
         } else {
             setY(getY() - y);
         }
 
 
-        if ((getX() - x) < realLeftBorder || (getX() - x) > realRightBorder) {
+        if ((getX() - x) < realLeftBorder || (getX() - x) > realRightBorder|| (leftBorder == 0 && rightBorder== 0)) {
         } else {
             setX(getX() - x);
 
@@ -253,9 +275,24 @@ public class FreedomView extends FrameLayout implements SensorEventListener {
         setLayoutParams(-x * 3, -y * 6);
     }
 
+    /**
+     * 重置位置
+     */
     public void resetLocal() {
         resetBalance();
         setX(originalX);
         setY(originalY);
+        System.out.println("dfadadfsa");
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        handler.removeMessages(0);
+        if (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) {
+            Message msg = Message.obtain();
+            msg.what = 0;
+            handler.sendMessageDelayed(msg, autoResetTime);
+        }
+        return super.dispatchTouchEvent(ev);
     }
 }
